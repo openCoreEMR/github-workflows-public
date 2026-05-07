@@ -1,0 +1,93 @@
+name: Release Please (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      config-file:
+        description: Path to release-please-config.json
+        type: string
+        default: release-please-config.json
+      manifest-file:
+        description: Path to .release-please-manifest.json
+        type: string
+        default: .release-please-manifest.json
+      runs-on:
+        description: Runner label for the job
+        type: string
+        default: ubuntu-latest
+      checkout-fetch-depth:
+        description: fetch-depth for actions/checkout
+        type: number
+        default: 0
+    secrets:
+      token:
+        description: Token for checkout and release-please. Falls back to GITHUB_TOKEN.
+        required: false
+    outputs:
+      releases_created:
+        description: '"true" if any release was created'
+        value: ${{ jobs.release-please.outputs.releases_created }}
+      release_created:
+        description: '"true" if a release was created (root package, manifest mode)'
+        value: ${{ jobs.release-please.outputs.release_created }}
+      tag_name:
+        description: Tag name of the created release (root package)
+        value: ${{ jobs.release-please.outputs.tag_name }}
+      version:
+        description: Version of the created release (root package)
+        value: ${{ jobs.release-please.outputs.version }}
+      paths_released:
+        description: JSON array of package paths that were released
+        value: ${{ jobs.release-please.outputs.paths_released }}
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: ${{ inputs.checkout-fetch-depth }}
+          token: ${{ secrets.token || github.token }}
+
+      - name: Run Release Please
+        id: release
+        uses: openCoreEMR/release-please-action@v5.0.0-oce.1
+        with:
+          config-file: ${{ inputs.config-file }}
+          manifest-file: ${{ inputs.manifest-file }}
+          token: ${{ secrets.token || github.token }}
+
+      - name: Summary
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
+        env:
+          TAG: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          # shellcheck disable=SC2016 # printf interprets the format string; single quotes are correct
+          {
+            printf '## Release Created\n\n'
+            printf '| Tag | Version |\n'
+            printf '|-----|---------|\n'
+            printf '| `%s` | `%s` |\n' "$TAG" "$VERSION"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summary - No Release
+        if: ${{ steps.release.outputs.releases_created != 'true' }}
+        run: |
+          # shellcheck disable=SC2016 # printf interprets the format string; single quotes are correct
+          {
+            printf '## No Release Created\n\n'
+            printf 'No conventional commits requiring a release were found.\n'
+          } >> "$GITHUB_STEP_SUMMARY"
