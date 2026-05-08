@@ -1,0 +1,43 @@
+name: dclint (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node.js version
+        type: string
+        default: '20'
+      runs-on:
+        description: Runner label
+        type: string
+        default: ubuntu-latest
+
+jobs:
+  dclint:
+    name: Lint Docker Compose files
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install dclint
+        run: npm install -g dclint
+
+      - name: Run dclint
+        run: |
+          git ls-files -z 'compose.yml' \
+                          'compose.yaml' \
+                          'docker-compose*.yml' \
+                          'docker-compose*.yaml' \
+                          '**/compose.yml' \
+                          '**/compose.yaml' \
+                          '**/docker-compose*.yml' \
+                          '**/docker-compose*.yaml' |
+          xargs --null --no-run-if-empty dclint

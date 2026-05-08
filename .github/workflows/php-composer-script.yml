@@ -1,0 +1,98 @@
+name: PHP Composer Script (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: Display name for the job
+        type: string
+        required: true
+      run:
+        description: Shell command to execute (e.g., "composer phpstan")
+        type: string
+        required: true
+      php-version:
+        description: PHP version to install
+        type: string
+        default: '8.2'
+      php-extensions:
+        description: PHP extensions to install
+        type: string
+        default: 'json, curl'
+      php-tools:
+        description: Tools for shivammathur/setup-php
+        type: string
+        default: 'composer:v2'
+      install-deps:
+        description: Run "composer install" before the script
+        type: boolean
+        default: true
+      composer-install-args:
+        description: Arguments for composer install
+        type: string
+        default: '--prefer-dist --no-progress --no-interaction'
+      private-repos:
+        description: Comma-separated list of private repos the GitHub App token should access. If non-empty, secrets app-id and app-private-key must be provided.
+        type: string
+        default: ''
+      runs-on:
+        description: Runner label
+        type: string
+        default: ubuntu-latest
+    secrets:
+      app-id:
+        description: GitHub App ID for private-repos auth
+        required: false
+      app-private-key:
+        description: GitHub App private key for private-repos auth
+        required: false
+
+jobs:
+  run:
+    name: ${{ inputs.name }}
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Generate token for private repos
+        if: ${{ inputs.private-repos != '' }}
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.app-private-key }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ inputs.private-repos }}
+
+      - name: Configure git auth for private repos
+        if: ${{ inputs.private-repos != '' }}
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+        run: git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php-version }}
+          extensions: ${{ inputs.php-extensions }}
+          coverage: none
+          tools: ${{ inputs.php-tools }}
+
+      - name: Cache Composer dependencies
+        if: ${{ inputs.install-deps }}
+        uses: actions/cache@v5
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        if: ${{ inputs.install-deps }}
+        run: composer install ${{ inputs.composer-install-args }}
+
+      - name: ${{ inputs.name }}
+        run: ${{ inputs.run }}
