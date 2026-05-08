@@ -13,6 +13,12 @@ on:
     paths:
       - .github/workflows/**
       - .github/actions/**
+  workflow_call:
+    inputs:
+      runs-on:
+        description: Runner label
+        type: string
+        default: ubuntu-latest
 
 permissions:
   contents: read
@@ -20,7 +26,7 @@ permissions:
 jobs:
   actionlint:
     name: Lint GitHub Actions workflows
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout code

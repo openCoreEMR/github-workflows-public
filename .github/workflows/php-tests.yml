@@ -1,0 +1,129 @@
+name: PHP Tests (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      php-versions:
+        description: JSON array of PHP versions to test
+        type: string
+        default: '["8.2","8.3","8.4","8.5"]'
+      coverage-php-version:
+        description: PHP version on which to run coverage. Set to empty string to disable coverage entirely.
+        type: string
+        default: '8.2'
+      php-extensions:
+        description: PHP extensions to install
+        type: string
+        default: 'curl, json, mbstring'
+      composer-install-args:
+        description: Arguments for composer install
+        type: string
+        default: '--prefer-dist --no-progress --no-interaction'
+      test-script:
+        description: Composer script for the test run (no-coverage matrix entries)
+        type: string
+        default: 'composer test'
+      coverage-command:
+        description: Command run for the coverage matrix entry
+        type: string
+        default: 'vendor/bin/phpunit --coverage-text --coverage-html coverage-report --colors=never'
+      coverage-artifact-name:
+        description: Artifact name for the uploaded coverage report
+        type: string
+        default: 'coverage-report'
+      coverage-artifact-path:
+        description: Path to upload as the coverage artifact
+        type: string
+        default: 'coverage-report/'
+      coverage-retention-days:
+        description: Retention days for the coverage artifact
+        type: number
+        default: 14
+      private-repos:
+        description: Comma-separated list of private repos the GitHub App token should access. If non-empty, secrets app-id and app-private-key must be provided.
+        type: string
+        default: ''
+      runs-on:
+        description: Runner label
+        type: string
+        default: ubuntu-latest
+    secrets:
+      app-id:
+        required: false
+      app-private-key:
+        required: false
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php-version }} Tests
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ${{ fromJSON(inputs.php-versions) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Generate token for private repos
+        if: ${{ inputs.private-repos != '' }}
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.app-private-key }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ inputs.private-repos }}
+
+      - name: Configure git auth for private repos
+        if: ${{ inputs.private-repos != '' }}
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+        run: git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: ${{ inputs.php-extensions }}
+          coverage: ${{ matrix.php-version == inputs.coverage-php-version && 'xdebug' || 'none' }}
+          tools: composer:v2
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: |
+          {
+            printf dir=
+            composer config cache-files-dir
+          } > "$GITHUB_OUTPUT"
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install ${{ inputs.composer-install-args }}
+
+      - name: Run tests
+        if: ${{ matrix.php-version != inputs.coverage-php-version || inputs.coverage-php-version == '' }}
+        run: ${{ inputs.test-script }}
+
+      - name: Run tests with coverage
+        if: ${{ matrix.php-version == inputs.coverage-php-version && inputs.coverage-php-version != '' }}
+        run: |
+          echo "::group::Running PHPUnit with Coverage"
+          ${{ inputs.coverage-command }}
+          echo "::endgroup::"
+
+      - name: Upload coverage report
+        if: ${{ matrix.php-version == inputs.coverage-php-version && inputs.coverage-php-version != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.coverage-artifact-name }}
+          path: ${{ inputs.coverage-artifact-path }}
+          retention-days: ${{ inputs.coverage-retention-days }}

@@ -1,0 +1,26 @@
+name: hadolint (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: Runner label
+        type: string
+        default: ubuntu-latest
+
+jobs:
+  hadolint:
+    name: Lint Dockerfiles
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Run hadolint
+        run: |
+          git ls-files -z 'Dockerfile*' \
+                          '**/Dockerfile*' |
+          xargs --null --no-run-if-empty --replace={} \
+            docker run --rm -v "$PWD:/workdir" -w /workdir hadolint/hadolint hadolint "{}"
