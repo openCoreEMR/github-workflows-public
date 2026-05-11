@@ -1,3 +1,30 @@
+# PHPUnit reusable workflow with PHP-version matrix and optional coverage.
+#
+# Recommended caller stanza:
+#
+#   name: Tests
+#   on:
+#     push:
+#       branches: [main]
+#       paths:
+#         - '**.php'
+#         - composer.json
+#         - composer.lock
+#         - phpunit.xml
+#         - phpunit.xml.dist
+#         - .github/workflows/tests.yml
+#     pull_request:
+#       branches: [main]
+#       paths:
+#         - '**.php'
+#         - composer.json
+#         - composer.lock
+#         - phpunit.xml
+#         - phpunit.xml.dist
+#         - .github/workflows/tests.yml
+#   jobs:
+#     test:
+#       uses: openCoreEMR/github-workflows-public/.github/workflows/php-tests.yml@<tag>
 name: PHP Tests (reusable)
 
 on:
