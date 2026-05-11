@@ -14,6 +14,12 @@ Releases are managed by [release-please](https://github.com/googleapis/release-p
 
 Pin to a specific version tag (e.g. `@1.0.0`). Pinning to `@main` works but may break without warning.
 
+## Path filters live in the caller, not the reusable
+
+GitHub evaluates `on: push.paths` and `on: pull_request.paths` *before* the reusable is invoked, so the reusable only sees `workflow_call` and cannot influence whether the workflow runs at all. Always declare an appropriately scoped `paths:` filter in the caller — running every PHP linter on every CSS-only PR wastes both runner minutes and reviewer attention.
+
+Each reusable workflow file has a header comment with the recommended caller stanza (including paths). Copy from there. As a rule of thumb, include the caller's own workflow file in the paths so the job re-runs whenever the caller changes.
+
 ## Workflows
 
 ### `release-please-reusable.yml`

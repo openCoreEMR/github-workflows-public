@@ -1,3 +1,15 @@
+# Conventional PR Title reusable workflow. Validates that PR titles follow
+# Conventional Commits. No paths filter — must run on every PR title change.
+#
+# Recommended caller stanza:
+#
+#   name: Conventional PR Title
+#   on:
+#     pull_request:
+#       types: [opened, edited, synchronize, reopened]
+#   jobs:
+#     conventional-pr-title:
+#       uses: openCoreEMR/github-workflows-public/.github/workflows/conventional-pr-title.yml@<tag>
 name: Conventional PR Title (reusable)
 
 on:
