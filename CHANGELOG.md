@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.3](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.2...0.0.3) (2026-05-12)
+
+
+### Documentation
+
+* document recommended caller paths filter for each reusable ([#5](https://github.com/openCoreEMR/github-workflows-public/issues/5)) ([d363ec6](https://github.com/openCoreEMR/github-workflows-public/commit/d363ec6332efddf6d6f3d57121d75b6932530c37))
+* refine recommended paths defaults ([#7](https://github.com/openCoreEMR/github-workflows-public/issues/7)) ([3a560b3](https://github.com/openCoreEMR/github-workflows-public/commit/3a560b33ff836a1bf42641f63f0b99699a608947))
+
 ## [0.0.2](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.1...0.0.2) (2026-05-08)
 
 
