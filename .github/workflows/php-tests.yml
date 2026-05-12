@@ -1,27 +1,18 @@
 # PHPUnit reusable workflow with PHP-version matrix and optional coverage.
 #
+# Tests depend on too many runtime assets (templates, SQL, config, fixtures)
+# to safely enumerate via a paths filter. Don't add one — let tests run on
+# every change. The runner cost is much smaller than the cost of skipping
+# tests when an asset that affects them changed.
+#
 # Recommended caller stanza:
 #
 #   name: Tests
 #   on:
 #     push:
 #       branches: [main]
-#       paths:
-#         - '**.php'
-#         - composer.json
-#         - composer.lock
-#         - phpunit.xml
-#         - phpunit.xml.dist
-#         - .github/workflows/tests.yml
 #     pull_request:
 #       branches: [main]
-#       paths:
-#         - '**.php'
-#         - composer.json
-#         - composer.lock
-#         - phpunit.xml
-#         - phpunit.xml.dist
-#         - .github/workflows/tests.yml
 #   jobs:
 #     test:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/php-tests.yml@<tag>

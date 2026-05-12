@@ -34,17 +34,21 @@
 #         name: Run PHPStan
 #         run: composer phpstan
 #
-# Recommended path filters by script (in addition to the workflow file
-# and composer.json/composer.lock for anything that runs `composer install`):
+# Recommended path filters by script. Always include composer.json (and
+# composer.lock for anything that runs `composer install`) since each job
+# is invoked through a composer script that's defined there:
 #
 #   composer-validate          composer.json
 #   composer-normalize         composer.json
 #   composer-require-checker   composer.json, composer.lock, '**.php',
 #                              .composer-require-checker.json
-#   php-syntax-check           '**.php'
-#   phpcs                      '**.php', .phpcs.xml*, phpcs.xml*
-#   phpstan                    '**.php', phpstan.neon*, phpstan-baseline.neon
-#   rector                     '**.php', rector.php
+#   php-syntax-check           '**.php', composer.json
+#   phpcs                      '**.php', .phpcs.xml*, phpcs.xml*,
+#                              composer.json, composer.lock
+#   phpstan                    '**.php', phpstan.neon*, phpstan-baseline.neon,
+#                              composer.json, composer.lock
+#   rector                     '**.php', rector.php,
+#                              composer.json, composer.lock
 name: PHP Composer Script (reusable)
 
 on:

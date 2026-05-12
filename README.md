@@ -18,7 +18,14 @@ Pin to a specific version tag (e.g. `@1.0.0`). Pinning to `@main` works but may 
 
 GitHub evaluates `on: push.paths` and `on: pull_request.paths` *before* the reusable is invoked, so the reusable only sees `workflow_call` and cannot influence whether the workflow runs at all. Always declare an appropriately scoped `paths:` filter in the caller — running every PHP linter on every CSS-only PR wastes both runner minutes and reviewer attention.
 
-Each reusable workflow file has a header comment with the recommended caller stanza (including paths). Copy from there. As a rule of thumb, include the caller's own workflow file in the paths so the job re-runs whenever the caller changes.
+Each reusable workflow file has a header comment with the recommended caller stanza (including paths). Copy from there.
+
+Two rules of thumb:
+
+1. **Include `composer.json` in every PHP linter caller.** The linters are invoked through composer scripts (`composer phpstan`, `composer phpcs`, etc.), so a change to `composer.json` can change what runs. For anything that runs `composer install`, also include `composer.lock`.
+2. **Don't put a `paths` filter on `tests.yml`.** Tests depend on too many runtime assets (templates, SQL, config, fixtures) to safely enumerate, and missing a real test failure costs more than running tests on a docs-only PR.
+
+And as a general rule, include the caller's own workflow file in the paths so the job re-runs whenever the caller changes.
 
 ## Workflows
 
