@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.3...0.0.4) (2026-05-12)
+
+
+### Bug Fixes
+
+* **php-tests:** make coverage opt-in; install pcov by default ([#8](https://github.com/openCoreEMR/github-workflows-public/issues/8)) ([1c845d1](https://github.com/openCoreEMR/github-workflows-public/commit/1c845d1328d41d8f1de513f028f26be84198d232))
+
 ## [0.0.3](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.2...0.0.3) (2026-05-12)
 
 
