@@ -1,11 +1,13 @@
-# PHPUnit reusable workflow with PHP-version matrix and optional coverage.
+# PHPUnit reusable workflow with PHP-version matrix.
 #
-# Tests depend on too many runtime assets (templates, SQL, config, fixtures)
-# to safely enumerate via a paths filter. Don't add one — let tests run on
-# every change. The runner cost is much smaller than the cost of skipping
-# tests when an asset that affects them changed.
+# Coverage is supported but not required. By default the reusable installs
+# pcov on every matrix entry (so PHPUnit configs that declare a <coverage>
+# block don't trip "No code coverage driver available" warnings) but does
+# NOT actually collect coverage. To collect and upload an HTML coverage
+# report, set `coverage-php-version` to the matrix entry that should run
+# coverage; the rest of the matrix continues to run `test-script`.
 #
-# Recommended caller stanza:
+# Recommended caller stanza (no coverage collection):
 #
 #   name: Tests
 #   on:
@@ -16,6 +18,17 @@
 #   jobs:
 #     test:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/php-tests.yml@<tag>
+#
+# To enable coverage collection on PHP 8.2 and upload the HTML report:
+#
+#   jobs:
+#     test:
+#       uses: openCoreEMR/github-workflows-public/.github/workflows/php-tests.yml@<tag>
+#       with:
+#         coverage-php-version: '8.2'
+#
+# Tests depend on too many runtime assets (templates, SQL, config,
+# fixtures) to safely enumerate via a paths filter. Don't add one.
 name: PHP Tests (reusable)
 
 on:
@@ -25,10 +38,6 @@ on:
         description: JSON array of PHP versions to test
         type: string
         default: '["8.2","8.3","8.4","8.5"]'
-      coverage-php-version:
-        description: PHP version on which to run coverage. Set to empty string to disable coverage entirely.
-        type: string
-        default: '8.2'
       php-extensions:
         description: PHP extensions to install
         type: string
@@ -38,11 +47,19 @@ on:
         type: string
         default: '--prefer-dist --no-progress --no-interaction'
       test-script:
-        description: Composer script for the test run (no-coverage matrix entries)
+        description: Command run on every matrix entry that is not the coverage entry. Also runs on the coverage entry when coverage-php-version is empty.
         type: string
         default: 'composer test'
+      coverage-driver:
+        description: Coverage driver to install on every matrix entry. Defaults to pcov so phpunit configs with a <coverage> block do not warn. Set to 'none' to skip; set to 'xdebug' for branch coverage.
+        type: string
+        default: 'pcov'
+      coverage-php-version:
+        description: If non-empty, run coverage-command on the matrix entry matching this PHP version (instead of test-script) and upload an HTML coverage artifact. Leave empty to skip coverage collection entirely.
+        type: string
+        default: ''
       coverage-command:
-        description: Command run for the coverage matrix entry
+        description: Command run on the coverage matrix entry. Used only when coverage-php-version is non-empty.
         type: string
         default: 'vendor/bin/phpunit --coverage-text --coverage-html coverage-report --colors=never'
       coverage-artifact-name:
@@ -106,7 +123,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           extensions: ${{ inputs.php-extensions }}
-          coverage: ${{ matrix.php-version == inputs.coverage-php-version && 'xdebug' || 'none' }}
+          coverage: ${{ inputs.coverage-driver }}
           tools: composer:v2
 
       - name: Get composer cache directory
@@ -128,18 +145,18 @@ jobs:
         run: composer install ${{ inputs.composer-install-args }}
 
       - name: Run tests
-        if: ${{ matrix.php-version != inputs.coverage-php-version || inputs.coverage-php-version == '' }}
+        if: ${{ inputs.coverage-php-version == '' || matrix.php-version != inputs.coverage-php-version }}
         run: ${{ inputs.test-script }}
 
       - name: Run tests with coverage
-        if: ${{ matrix.php-version == inputs.coverage-php-version && inputs.coverage-php-version != '' }}
+        if: ${{ inputs.coverage-php-version != '' && matrix.php-version == inputs.coverage-php-version }}
         run: |
           echo "::group::Running PHPUnit with Coverage"
           ${{ inputs.coverage-command }}
           echo "::endgroup::"
 
       - name: Upload coverage report
-        if: ${{ matrix.php-version == inputs.coverage-php-version && inputs.coverage-php-version != '' }}
+        if: ${{ inputs.coverage-php-version != '' && matrix.php-version == inputs.coverage-php-version }}
         uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.coverage-artifact-name }}
