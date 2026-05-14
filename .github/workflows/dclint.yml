@@ -1,6 +1,8 @@
 # dclint (Docker Compose linter) reusable workflow.
 #
-# Recommended caller stanza:
+# Recommended caller stanza. Do not add `paths:` to `pull_request`; it
+# breaks promotion to a required check (skipped run = missing check =
+# auto-merge stall). Path filtering on `push` is fine.
 #
 #   name: dclint
 #   on:
@@ -14,12 +16,6 @@
 #         - .github/workflows/dclint.yml
 #     pull_request:
 #       branches: [main]
-#       paths:
-#         - '**/compose.yml'
-#         - '**/compose.yaml'
-#         - '**/docker-compose*.yml'
-#         - '**/docker-compose*.yaml'
-#         - .github/workflows/dclint.yml
 #   jobs:
 #     dclint:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/dclint.yml@<tag>
