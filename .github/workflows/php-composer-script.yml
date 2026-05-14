@@ -1,7 +1,10 @@
 # Generic reusable for any "composer install + composer <script>" job
 # (phpstan, phpcs, rector, composer-validate, composer-normalize,
 # composer-require-checker, php-syntax-check, etc.). The caller should
-# scope the trigger to relevant paths so the job only runs when needed.
+# scope the `push` trigger to relevant paths so post-merge runs on
+# `main` only fire when needed. Do NOT add `paths:` to `pull_request`;
+# it breaks promotion to a required check (skipped run = missing check
+# = auto-merge stall).
 #
 # Recommended caller stanza (PHPStan):
 #
@@ -19,14 +22,6 @@
 #         - .github/workflows/phpstan.yml
 #     pull_request:
 #       branches: [main]
-#       paths:
-#         - '**.php'
-#         - phpstan.neon
-#         - phpstan.neon.dist
-#         - phpstan-baseline.neon
-#         - composer.json
-#         - composer.lock
-#         - .github/workflows/phpstan.yml
 #   jobs:
 #     phpstan:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/php-composer-script.yml@<tag>
@@ -36,9 +31,10 @@
 #         name: Run PHPStan
 #         run: composer phpstan
 #
-# Recommended path filters by script. Always include composer.json (and
-# composer.lock for anything that runs `composer install`) since each job
-# is invoked through a composer script that's defined there:
+# Recommended `push.paths` filters by script. Always include
+# composer.json (and composer.lock for anything that runs
+# `composer install`) since each job is invoked through a composer
+# script that's defined there:
 #
 #   composer-validate          composer.json
 #   composer-normalize         composer.json

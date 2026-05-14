@@ -1,6 +1,8 @@
 # actionlint reusable workflow.
 #
-# Recommended caller stanza:
+# Recommended caller stanza. Do not add `paths:` to `pull_request`; it
+# breaks promotion to a required check (skipped run = missing check =
+# auto-merge stall). Path filtering on `push` is fine.
 #
 #   name: actionlint
 #   on:
@@ -11,9 +13,6 @@
 #         - .github/actions/**
 #     pull_request:
 #       branches: [main]
-#       paths:
-#         - .github/workflows/**
-#         - .github/actions/**
 #   jobs:
 #     actionlint:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/actionlint.yml@<tag>
@@ -31,9 +30,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - .github/workflows/**
-      - .github/actions/**
   workflow_call:
     inputs:
       runs-on:

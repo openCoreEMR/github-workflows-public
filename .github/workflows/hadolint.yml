@@ -1,6 +1,8 @@
 # hadolint (Dockerfile linter) reusable workflow.
 #
-# Recommended caller stanza:
+# Recommended caller stanza. Do not add `paths:` to `pull_request`; it
+# breaks promotion to a required check (skipped run = missing check =
+# auto-merge stall). Path filtering on `push` is fine.
 #
 #   name: hadolint
 #   on:
@@ -11,9 +13,6 @@
 #         - .github/workflows/hadolint.yml
 #     pull_request:
 #       branches: [main]
-#       paths:
-#         - '**/Dockerfile*'
-#         - .github/workflows/hadolint.yml
 #   jobs:
 #     hadolint:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/hadolint.yml@<tag>
