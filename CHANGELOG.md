@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.4...0.0.5) (2026-05-14)
+
+
+### Documentation
+
+* **workflows:** document required caller permissions to prevent startup_failure ([#10](https://github.com/openCoreEMR/github-workflows-public/issues/10)) ([60d551d](https://github.com/openCoreEMR/github-workflows-public/commit/60d551dfc89158af9d0491087393d76a887bea55))
+
 ## [0.0.4](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.3...0.0.4) (2026-05-12)
 
 
