@@ -1,3 +1,20 @@
+# Release Please reusable workflow. Wraps the openCoreEMR release-please-action
+# fork to open release PRs and cut annotated tags from conventional commits.
+#
+# Recommended caller stanza:
+#
+#   name: Release Please
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+#   permissions: {}
+#   jobs:
+#     release-please:
+#       uses: openCoreEMR/github-workflows-public/.github/workflows/release-please-reusable.yml@<tag>
+#       permissions:
+#         contents: write
+#         pull-requests: write
 name: Release Please (reusable)
 
 on:

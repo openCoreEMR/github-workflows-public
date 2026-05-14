@@ -17,6 +17,8 @@
 #   jobs:
 #     hadolint:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/hadolint.yml@<tag>
+#       permissions:
+#         contents: read
 name: hadolint (reusable)
 
 on:
