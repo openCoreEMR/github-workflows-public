@@ -18,12 +18,16 @@
 #   jobs:
 #     test:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/php-tests.yml@<tag>
+#       permissions:
+#         contents: read
 #
 # To enable coverage collection on PHP 8.2 and upload the HTML report:
 #
 #   jobs:
 #     test:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/php-tests.yml@<tag>
+#       permissions:
+#         contents: read
 #       with:
 #         coverage-php-version: '8.2'
 #

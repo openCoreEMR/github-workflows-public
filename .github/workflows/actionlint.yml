@@ -17,6 +17,8 @@
 #   jobs:
 #     actionlint:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/actionlint.yml@<tag>
+#       permissions:
+#         contents: read
 name: actionlint
 
 on:

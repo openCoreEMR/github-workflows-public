@@ -8,6 +8,32 @@ Consumers reference workflows here as:
 uses: opencoreemr/github-workflows-public/.github/workflows/<name>.yml@<ref>
 ```
 
+## Caller permissions
+
+When invoking these reusable workflows, the **caller** must declare the permissions the workflow needs. Org policy on `openCoreEMR` requires explicit caller-side declarations even when the reusable workflow declares its own internally. Omit them and the job never starts (`startup_failure` with empty logs).
+
+| Workflow | Required caller permissions |
+|----------|-----------------------------|
+| `actionlint.yml` | `contents: read` |
+| `conventional-pr-title.yml` | `pull-requests: read` |
+| `dclint.yml` | `contents: read` |
+| `hadolint.yml` | `contents: read` |
+| `php-composer-script.yml` | `contents: read` |
+| `php-tests.yml` | `contents: read` |
+| `release-please-reusable.yml` | `contents: write`, `pull-requests: write` |
+
+Example:
+
+```yaml
+jobs:
+  conventional-pr-title:
+    uses: openCoreEMR/github-workflows-public/.github/workflows/conventional-pr-title.yml@<tag>
+    permissions:
+      pull-requests: read
+```
+
+Each reusable's header comment shows the full recommended caller stanza, including the required `permissions:` block.
+
 ## Versioning
 
 Releases are managed by [release-please](https://github.com/googleapis/release-please) using the openCoreEMR fork ([release-please-action](https://github.com/openCoreEMR/release-please-action)) which adds annotated-tag support. Conventional commits to `main` automatically open a release PR; merging that PR creates an annotated tag and GitHub release.

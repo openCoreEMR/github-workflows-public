@@ -10,6 +10,8 @@
 #   jobs:
 #     conventional-pr-title:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/conventional-pr-title.yml@<tag>
+#       permissions:
+#         pull-requests: read
 name: Conventional PR Title (reusable)
 
 on:

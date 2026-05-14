@@ -23,6 +23,8 @@
 #   jobs:
 #     dclint:
 #       uses: openCoreEMR/github-workflows-public/.github/workflows/dclint.yml@<tag>
+#       permissions:
+#         contents: read
 name: dclint (reusable)
 
 on:
