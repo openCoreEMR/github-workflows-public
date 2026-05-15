@@ -109,7 +109,11 @@ jobs:
         if: ${{ env.APP_CLIENT_ID != '' && env.APP_PRIVATE_KEY != '' }}
         uses: actions/create-github-app-token@v3
         with:
-          client-id: ${{ env.APP_CLIENT_ID }}
+          # `app-id` accepts a Client ID as well; the action emits a runtime
+          # deprecation warning preferring `client-id`, but the bundled
+          # actionlint database doesn't know `client-id` yet and fails the
+          # workflow. Stay on `app-id` until actionlint catches up.
+          app-id: ${{ env.APP_CLIENT_ID }}
           private-key: ${{ env.APP_PRIVATE_KEY }}
 
       - name: Resolve effective token
