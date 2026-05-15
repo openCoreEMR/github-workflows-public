@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.5...0.0.6) (2026-05-15)
+
+
+### Features
+
+* **release-please:** accept App credentials and mint token in-job ([#13](https://github.com/openCoreEMR/github-workflows-public/issues/13)) ([8c08ff2](https://github.com/openCoreEMR/github-workflows-public/commit/8c08ff234e87f1e95a53b8da241cff1379c4220d))
+
 ## [0.0.5](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.4...0.0.5) (2026-05-14)
 
 
