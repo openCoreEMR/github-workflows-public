@@ -70,8 +70,12 @@ Inputs:
 
 Secrets:
 
-| Name    | Required | Description                                                  |
-|---------|----------|--------------------------------------------------------------|
-| `token` | no       | Token for checkout and release-please. Falls back to caller's `GITHUB_TOKEN`. |
+| Name              | Required | Description                                                                                                             |
+|-------------------|----------|-------------------------------------------------------------------------------------------------------------------------|
+| `token`           | no       | Pre-minted token for checkout and release-please. Falls back to App-minted token, then `GITHUB_TOKEN`.                  |
+| `app-client-id`   | no       | GitHub App Client ID. Overrides the org-level `RELEASE_PLEASE_CLIENT_ID` variable. Paired with `app-private-key`.       |
+| `app-private-key` | no       | GitHub App private key (PEM). Overrides the org-level `RELEASE_PLEASE_PRIVATE_KEY` secret. Paired with `app-client-id`. |
+
+Callers in the `openCoreEMR` org should use `secrets: inherit`. The reusable workflow reads the org variable `RELEASE_PLEASE_CLIENT_ID` (auto-inherited) and the org secret `RELEASE_PLEASE_PRIVATE_KEY` (forwarded by `inherit`), mints a short-lived App installation token, and uses it for checkout and release-please. PRs opened by the App identity trigger downstream `pull_request` workflows; PRs opened by the default `GITHUB_TOKEN` do not (GitHub anti-recursion).
 
 The pinned action ref (`openCoreEMR/release-please-action@v5.0.0-oce.1`) is hardcoded — GitHub Actions does not allow expressions in `uses:` references, so it can't be a workflow input.
