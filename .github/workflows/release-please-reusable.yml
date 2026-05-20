@@ -16,12 +16,19 @@
 #       permissions:
 #         contents: write
 #         pull-requests: write
-#       secrets:
-#         app-client-id: ${{ vars.RELEASE_PLEASE_CLIENT_ID }}
-#         app-private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
+#       secrets: inherit
 #
-# Without app-client-id/app-private-key the workflow falls back to the
-# default GITHUB_TOKEN, which still works but means release PRs do not
+# `secrets: inherit` forwards the org-level RELEASE_PLEASE_PRIVATE_KEY secret;
+# the paired RELEASE_PLEASE_CLIENT_ID is an org variable and is available to
+# same-org reusable workflows automatically. This workflow reads both and mints
+# an App installation token, so the resulting release PR is opened by the App
+# identity and triggers downstream pull_request workflows.
+#
+# Callers that prefer explicit wiring can still pass app-client-id /
+# app-private-key as secrets — those override the org-level fallbacks.
+#
+# Without App credentials reachable by either path, the workflow falls back to
+# the default GITHUB_TOKEN, which still works but means release PRs do not
 # trigger pull_request workflows (GitHub anti-recursion).
 name: Release Please (reusable)
 
@@ -60,6 +67,12 @@ on:
       app-private-key:
         description: GitHub App private key (PEM). Paired with app-client-id.
         required: false
+      RELEASE_PLEASE_PRIVATE_KEY:
+        description: |
+          Org-level fallback for app-private-key, automatically provided when
+          the caller uses `secrets: inherit`. Declared here so actionlint
+          accepts the reference; callers should not pass it explicitly.
+        required: false
     outputs:
       releases_created:
         description: '"true" if any release was created'
@@ -84,13 +97,16 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    # Hoist credentials to job env so step-level `if:` can read them.
-    # GitHub allows the `env` context in step `if:` only when env is defined
-    # at the workflow or job level; the `secrets` context is not available
-    # in step `if:` at all.
+    # Hoist credentials to job env so step-level `if:` can read them — GitHub
+    # allows the `env` context in step `if:` only when env is defined at the
+    # workflow or job level, and the `secrets` context isn't allowed in `if:`
+    # at all. Each credential prefers an explicit caller-passed secret, then
+    # falls back to the org-level value forwarded by `secrets: inherit` (and
+    # the auto-inherited org variable for the client ID). When both resolve to
+    # empty the mint step skips and resolve-token picks the next option.
     env:
-      APP_CLIENT_ID: ${{ secrets.app-client-id }}
-      APP_PRIVATE_KEY: ${{ secrets.app-private-key }}
+      APP_CLIENT_ID: ${{ secrets.app-client-id || vars.RELEASE_PLEASE_CLIENT_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.app-private-key || secrets.RELEASE_PLEASE_PRIVATE_KEY }}
       PASSED_TOKEN: ${{ secrets.token }}
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
