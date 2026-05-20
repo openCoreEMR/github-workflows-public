@@ -63,9 +63,13 @@ on:
         type: string
         default: ''
       coverage-command:
-        description: Command run on the coverage matrix entry. Used only when coverage-php-version is non-empty.
+        description: |
+          Command run on the coverage matrix entry. Used only when coverage-php-version is non-empty.
+          The default writes three outputs into coverage-report/: the HTML report,
+          coverage.txt (PHPUnit text report — totals plus per-file lines), and clover.xml
+          (machine-readable line coverage for agents and CI tools).
         type: string
-        default: 'vendor/bin/phpunit --coverage-text --coverage-html coverage-report --colors=never'
+        default: 'mkdir -p coverage-report && vendor/bin/phpunit --coverage-text=coverage-report/coverage.txt --coverage-clover=coverage-report/clover.xml --coverage-html=coverage-report --colors=never'
       coverage-artifact-name:
         description: Artifact name for the uploaded coverage report
         type: string
