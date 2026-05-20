@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.6...1.0.0) (2026-05-20)
+
+
+### Features
+
+* **release-please:** read org credentials so `secrets: inherit` works ([#16](https://github.com/openCoreEMR/github-workflows-public/issues/16)) ([de96c43](https://github.com/openCoreEMR/github-workflows-public/commit/de96c43ed98713e3b69ef309c71527000f36d277))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([09c04b9](https://github.com/openCoreEMR/github-workflows-public/commit/09c04b96bebf2d023f5a77badb844216bf0aeab0))
+
 ## [0.0.6](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.5...0.0.6) (2026-05-15)
 
 
