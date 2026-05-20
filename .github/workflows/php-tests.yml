@@ -62,14 +62,25 @@ on:
         description: If non-empty, run coverage-command on the matrix entry matching this PHP version (instead of test-script) and upload an HTML coverage artifact. Leave empty to skip coverage collection entirely.
         type: string
         default: ''
+      coverage-html:
+        description: Generate the PHPUnit HTML coverage report under coverage-report/. Ignored when coverage-command is non-empty.
+        type: boolean
+        default: true
+      coverage-text:
+        description: Generate the PHPUnit text coverage report at coverage-report/coverage.txt. Ignored when coverage-command is non-empty.
+        type: boolean
+        default: true
+      coverage-clover:
+        description: Generate the Clover XML coverage report at coverage-report/clover.xml. Ignored when coverage-command is non-empty.
+        type: boolean
+        default: true
       coverage-command:
         description: |
-          Command run on the coverage matrix entry. Used only when coverage-php-version is non-empty.
-          The default writes three outputs into coverage-report/: the HTML report,
-          coverage.txt (PHPUnit text report — totals plus per-file lines), and clover.xml
-          (machine-readable line coverage for agents and CI tools).
+          Explicit override for the PHPUnit coverage invocation, used only when coverage-php-version is non-empty.
+          Leave empty (default) to let coverage-html / coverage-text / coverage-clover compose the command.
+          When set, the booleans are ignored and this string is run as-is.
         type: string
-        default: 'mkdir -p coverage-report && vendor/bin/phpunit --coverage-text=coverage-report/coverage.txt --coverage-clover=coverage-report/clover.xml --coverage-html=coverage-report --colors=never'
+        default: ''
       coverage-artifact-name:
         description: Artifact name for the uploaded coverage report
         type: string
@@ -158,9 +169,34 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ inputs.coverage-php-version != '' && matrix.php-version == inputs.coverage-php-version }}
+        env:
+          COVERAGE_COMMAND: ${{ inputs.coverage-command }}
+          COVERAGE_HTML: ${{ inputs.coverage-html }}
+          COVERAGE_TEXT: ${{ inputs.coverage-text }}
+          COVERAGE_CLOVER: ${{ inputs.coverage-clover }}
         run: |
+          set -euo pipefail
+          mkdir -p coverage-report
           echo "::group::Running PHPUnit with Coverage"
-          ${{ inputs.coverage-command }}
+          if [[ -n "$COVERAGE_COMMAND" ]]; then
+            eval "$COVERAGE_COMMAND"
+          else
+            args=()
+            if [[ "$COVERAGE_HTML" == 'true' ]]; then
+              args+=(--coverage-html=coverage-report)
+            fi
+            if [[ "$COVERAGE_TEXT" == 'true' ]]; then
+              args+=(--coverage-text=coverage-report/coverage.txt)
+            fi
+            if [[ "$COVERAGE_CLOVER" == 'true' ]]; then
+              args+=(--coverage-clover=coverage-report/clover.xml)
+            fi
+            if (( ${#args[@]} == 0 )); then
+              echo '::error::At least one of coverage-html, coverage-text, coverage-clover must be true (or set coverage-command).'
+              exit 1
+            fi
+            vendor/bin/phpunit "${args[@]}" --colors=never
+          fi
           echo "::endgroup::"
 
       - name: Upload coverage report
