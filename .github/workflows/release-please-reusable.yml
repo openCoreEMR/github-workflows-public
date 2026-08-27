@@ -1,5 +1,12 @@
-# Release Please reusable workflow. Wraps the openCoreEMR release-please-action
-# fork to open release PRs and cut annotated tags from conventional commits.
+# Release Please reusable workflow. Runs the openCoreEMR release-please fork's
+# CLI to open release PRs and cut annotated tags from conventional commits.
+#
+# The CLI is installed from the fork's source at a pinned commit and compiled
+# at install time (the package's `prepare` script), so fork changes (annotated
+# tags, the uv.lock updater, JSON dry-run preview) ship by bumping one SHA
+# here. The previous mechanism — openCoreEMR/release-please-action — ran a
+# committed dist/ bundle frozen at action-tag time, which silently pinned the
+# library months behind the fork branch its package.json named.
 #
 # Recommended caller stanza (mints a token from a GitHub App so release PRs
 # trigger pull_request workflows):
@@ -153,13 +160,53 @@ jobs:
           fetch-depth: ${{ inputs.checkout-fetch-depth }}
           token: ${{ steps.resolve-token.outputs.token }}
 
+      # Install from source at a pinned commit on the fork's
+      # feat/annotated-tags-and-preview branch; npm runs the package's
+      # `prepare` script, so the CLI is compiled from exactly this commit —
+      # no bundled dist to go stale. Deliver fork changes by bumping the SHA.
+      - name: Install release-please (openCoreEMR fork)
+        run: npm install -g --no-fund --no-audit 'github:openCoreEMR/release-please#69f51b77d7bb428b4e9c10ec20dc94f64d6dbf23'
+
       - name: Run Release Please
         id: release
-        uses: openCoreEMR/release-please-action@v5.0.0-oce.1
-        with:
-          config-file: ${{ inputs.config-file }}
-          manifest-file: ${{ inputs.manifest-file }}
-          token: ${{ steps.resolve-token.outputs.token }}
+        env:
+          TOKEN: ${{ steps.resolve-token.outputs.token }}
+          REPO_URL: ${{ github.repository }}
+          CONFIG_FILE: ${{ inputs.config-file }}
+          MANIFEST_FILE: ${{ inputs.manifest-file }}
+        run: |
+          set -o pipefail
+          common=(
+            --repo-url="$REPO_URL"
+            --config-file="$CONFIG_FILE"
+            --manifest-file="$MANIFEST_FILE"
+            --token="$TOKEN"
+          )
+
+          # The real github-release run prints Node object-inspect output, so
+          # machine-readable release data comes from the fork's --dry-run
+          # --json preview taken immediately before it. Logger checkpoint
+          # lines share stdout with the JSON, so keep only the block from the
+          # first bracket-opening line onward. An empty preview (no merged
+          # release PR) prints no JSON at all — normalize to [].
+          release-please github-release "${common[@]}" --dry-run --json > preview.out
+          awk '/^[[{]/{found=1} found' preview.out > releases.json
+          if [[ ! -s releases.json ]]; then
+            printf '[]\n' > releases.json
+          fi
+
+          release-please github-release "${common[@]}" --annotated-tag
+          release-please release-pr "${common[@]}"
+
+          # Same output names and shapes the release-please-action produced:
+          # release_created/tag_name/version describe the root (".") package.
+          {
+            printf 'releases_created=%s\n' "$(jq 'length > 0' releases.json)"
+            printf 'release_created=%s\n' "$(jq 'any(.[]; .path == ".")' releases.json)"
+            printf 'tag_name=%s\n' "$(jq -r '[.[] | select(.path == ".")][0].tag // ""' releases.json)"
+            printf 'version=%s\n' "$(jq -r '[.[] | select(.path == ".")][0].version // ""' releases.json)"
+            printf 'paths_released=%s\n' "$(jq -c '[.[].path]' releases.json)"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Summary
         if: ${{ steps.release.outputs.releases_created == 'true' }}
