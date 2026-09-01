@@ -1,5 +1,11 @@
-# Release Please reusable workflow. Wraps the openCoreEMR release-please-action
-# fork to open release PRs and cut annotated tags from conventional commits.
+# Release Please reusable workflow. Checks out the caller, mints a token, and
+# invokes the openCoreEMR release-please-action fork. It performs no tagging or
+# release creation of its own. The action opens release PRs from conventional
+# commits and, when a release PR merges, creates the GitHub release and its tag.
+#
+# The action's library fork creates annotated tags by default. Opt out with
+# `"annotated-tag": false` in release-please-config.json, which falls back to
+# the lightweight tag the GitHub Releases API creates.
 #
 # Recommended caller stanza (mints a token from a GitHub App so release PRs
 # trigger pull_request workflows):
