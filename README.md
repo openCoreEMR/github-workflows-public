@@ -78,4 +78,4 @@ Secrets:
 
 Callers in the `openCoreEMR` org should use `secrets: inherit`. The reusable workflow reads the org variable `RELEASE_PLEASE_CLIENT_ID` (auto-inherited) and the org secret `RELEASE_PLEASE_PRIVATE_KEY` (forwarded by `inherit`), mints a short-lived App installation token, and uses it for checkout and release-please. PRs opened by the App identity trigger downstream `pull_request` workflows; PRs opened by the default `GITHUB_TOKEN` do not (GitHub anti-recursion).
 
-The pinned action ref (`openCoreEMR/release-please-action@v5.0.0-oce.2`) is hardcoded — GitHub Actions does not allow expressions in `uses:` references, so it can't be a workflow input.
+The pinned action ref (`openCoreEMR/release-please-action@v5.0.0-oce.3`) is hardcoded — GitHub Actions does not allow expressions in `uses:` references, so it can't be a workflow input.
