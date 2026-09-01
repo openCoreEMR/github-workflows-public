@@ -1,0 +1,17 @@
+# actionlint bundles a snapshot of each action's inputs. Its copy of
+# actions/create-github-app-token predates the app-id -> client-id rename, so
+# it rejects the current, non-deprecated input name. v1.7.12 is the newest
+# release and still has the old set, so there is no linter bump that resolves
+# this; the suppression below is the only way to call the action without
+# tripping its runtime deprecation warning.
+#
+# Deliberately scoped to these two messages on this one file. php-tests.yml and
+# php-composer-script.yml still pass `app-id` because their credential is a
+# caller-supplied `app-id` secret rather than a Client ID, and they stay
+# covered by the normal rules. Drop this file once actionlint ships the
+# renamed input.
+paths:
+  .github/workflows/release-please-reusable.yml:
+    ignore:
+      - 'missing input "app-id" which is required by action "actions/create-github-app-token'
+      - 'input "client-id" is not defined in action "actions/create-github-app-token'

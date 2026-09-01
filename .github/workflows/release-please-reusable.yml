@@ -131,11 +131,14 @@ jobs:
         if: ${{ env.APP_CLIENT_ID != '' && env.APP_PRIVATE_KEY != '' }}
         uses: actions/create-github-app-token@v3
         with:
-          # `app-id` accepts a Client ID as well; the action emits a runtime
-          # deprecation warning preferring `client-id`, but the bundled
-          # actionlint database doesn't know `client-id` yet and fails the
-          # workflow. Stay on `app-id` until actionlint catches up.
-          app-id: ${{ env.APP_CLIENT_ID }}
+          # The credential is a Client ID, so it belongs in `client-id`.
+          # `app-id` still accepts one but the action now warns on it at
+          # runtime, on every release across the org. actionlint's bundled
+          # action database predates the rename and rejects `client-id`, so
+          # `.github/actionlint.yaml` suppresses those two messages for this
+          # file alone. Drop that suppression when actionlint ships the new
+          # input set.
+          client-id: ${{ env.APP_CLIENT_ID }}
           private-key: ${{ env.APP_PRIVATE_KEY }}
 
       - name: Resolve effective token
