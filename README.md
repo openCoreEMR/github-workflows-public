@@ -36,7 +36,7 @@ Each reusable's header comment shows the full recommended caller stanza, includi
 
 ## Versioning
 
-Releases are managed by [release-please](https://github.com/googleapis/release-please) using the openCoreEMR fork ([release-please-action](https://github.com/openCoreEMR/release-please-action)) which adds annotated-tag support. Conventional commits to `main` automatically open a release PR; merging that PR creates an annotated tag and GitHub release.
+Releases are managed by [release-please](https://github.com/googleapis/release-please) using the openCoreEMR fork ([release-please-action](https://github.com/openCoreEMR/release-please-action)), which creates annotated tags by default. Conventional commits to `main` automatically open a release PR; merging that PR creates an annotated tag and GitHub release.
 
 Pin to a specific version tag (e.g. `@1.0.0`). Pinning to `@main` works but may break without warning.
 
@@ -57,7 +57,7 @@ And as a general rule, include the caller's own workflow file in the paths so th
 
 ### `release-please-reusable.yml`
 
-Wraps the openCoreEMR release-please-action fork. Callers provide a `release-please-config.json` (with `"annotated-tag": true` to get annotated tags directly from the action) and a `.release-please-manifest.json`. Outputs include `releases_created`, `release_created`, `tag_name`, `version`, and `paths_released` so caller jobs can `needs:` the release-please job and gate on a release being created.
+Wraps the openCoreEMR release-please-action fork. Callers provide a `release-please-config.json` and a `.release-please-manifest.json`. The action creates annotated tags by default; set `"annotated-tag": false` in the config to opt out and get the lightweight tag the GitHub Releases API creates instead. The reusable workflow does not tag or release anything itself; it only invokes the action. Outputs include `releases_created`, `release_created`, `tag_name`, `version`, and `paths_released` so caller jobs can `needs:` the release-please job and gate on a release being created.
 
 Inputs:
 
@@ -78,4 +78,4 @@ Secrets:
 
 Callers in the `openCoreEMR` org should use `secrets: inherit`. The reusable workflow reads the org variable `RELEASE_PLEASE_CLIENT_ID` (auto-inherited) and the org secret `RELEASE_PLEASE_PRIVATE_KEY` (forwarded by `inherit`), mints a short-lived App installation token, and uses it for checkout and release-please. PRs opened by the App identity trigger downstream `pull_request` workflows; PRs opened by the default `GITHUB_TOKEN` do not (GitHub anti-recursion).
 
-The pinned action ref (`openCoreEMR/release-please-action@v5.0.0-oce.1`) is hardcoded — GitHub Actions does not allow expressions in `uses:` references, so it can't be a workflow input.
+The pinned action ref (`openCoreEMR/release-please-action@v5.0.0-oce.2`) is hardcoded — GitHub Actions does not allow expressions in `uses:` references, so it can't be a workflow input.
