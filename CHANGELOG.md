@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.0...1.0.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **release-please:** bump action to v5.0.0-oce.2 (uv.lock support) ([#23](https://github.com/openCoreEMR/github-workflows-public/issues/23)) ([caf5a3a](https://github.com/openCoreEMR/github-workflows-public/commit/caf5a3a86fc69091dc5db9ef2ff4b2c1e06514b8))
+* run actionlint from the OCE fork with corrected action metadata ([ef92691](https://github.com/openCoreEMR/github-workflows-public/commit/ef92691761a24ef54c5b403b755a9a3b5bdd9dcc))
+* use the canonical client-id input for create-github-app-token ([14814a3](https://github.com/openCoreEMR/github-workflows-public/commit/14814a3857289872966204ac8e43bec1c09fc873))
+
+
+### Documentation
+
+* **release-please:** annotated tags are the default ([#25](https://github.com/openCoreEMR/github-workflows-public/issues/25)) ([7353655](https://github.com/openCoreEMR/github-workflows-public/commit/73536556a6627577d01df41147a17447e2ff9101))
+
 ## [1.0.0](https://github.com/openCoreEMR/github-workflows-public/compare/0.0.6...1.0.0) (2026-05-20)
 
 
