@@ -6,6 +6,7 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "annotated-tag": true,
+  "release-as": "1.0.2",
   "packages": {
     ".": {
       "package-name": "github-workflows-public"
