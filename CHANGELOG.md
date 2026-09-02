@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.1...1.0.2) (2026-09-02)
+
+
+### Miscellaneous Chores
+
+* cut 1.0.2 to ship release-please-action v5.0.0-oce.3 ([b814b42](https://github.com/openCoreEMR/github-workflows-public/commit/b814b4258a11e3b08ef02f2f8ba8ff9d7ae9bc51))
+
 ## [1.0.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.0...1.0.1) (2026-09-02)
 
 
