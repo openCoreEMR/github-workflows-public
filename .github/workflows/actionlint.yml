@@ -50,4 +50,4 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Run actionlint
-        uses: openCoreEMR/actionlint@v1.7.12-oce.1
+        uses: openCoreEMR/actionlint@v1.7.12
