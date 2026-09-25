@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.2...1.1.0) (2026-09-25)
+
+
+### Features
+
+* expose per-component release outputs ([#33](https://github.com/openCoreEMR/github-workflows-public/issues/33)) ([92128ff](https://github.com/openCoreEMR/github-workflows-public/commit/92128ffa4e2e5976fb541df18899f667bc625252))
+
 ## [1.0.2](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.1...1.0.2) (2026-09-02)
 
 
