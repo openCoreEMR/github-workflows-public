@@ -95,6 +95,19 @@ on:
       paths_released:
         description: JSON array of package paths that were released
         value: ${{ jobs.release-please.outputs.paths_released }}
+      release_outputs:
+        description: |
+          JSON object of every release-please step output, including per-path
+          keys named `<path>--<key>` (e.g. `apps/web--tag_name`); root-package
+          keys are unprefixed. The exact key set is whatever the pinned action
+          emits, so it can change when that ref is bumped. Parse with
+          `fromJSON`. Carries more than the outputs above — notably
+          `<path>--body`, the full release notes for each released path — so a
+          repo releasing many components with long changelogs can approach
+          GitHub's 1 MB per-job output limit. Treat `<path>--body`, `pr` and
+          `prs` as untrusted text (commit messages, PR titles): pass them to
+          scripts via `env:`, never interpolate them into `run:`.
+        value: ${{ jobs.release-please.outputs.release_outputs }}
 
 jobs:
   release-please:
@@ -120,6 +133,10 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.version }}
       paths_released: ${{ steps.release.outputs.paths_released }}
+      # Whole step-outputs object, serialised. This workflow is shared across
+      # repos whose component names it cannot know, so it cannot declare a
+      # named output per component; callers index the blob themselves.
+      release_outputs: ${{ toJSON(steps.release.outputs) }}
 
     steps:
       # Mint an App installation token in-job. GitHub masks secret values when

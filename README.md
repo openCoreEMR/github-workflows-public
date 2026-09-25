@@ -57,7 +57,28 @@ And as a general rule, include the caller's own workflow file in the paths so th
 
 ### `release-please-reusable.yml`
 
-Wraps the openCoreEMR release-please-action fork. Callers provide a `release-please-config.json` and a `.release-please-manifest.json`. The action creates annotated tags by default; set `"annotated-tag": false` in the config to opt out and get the lightweight tag the GitHub Releases API creates instead. The reusable workflow does not tag or release anything itself; it only invokes the action. Outputs include `releases_created`, `release_created`, `tag_name`, `version`, and `paths_released` so caller jobs can `needs:` the release-please job and gate on a release being created.
+Wraps the openCoreEMR release-please-action fork. Callers provide a `release-please-config.json` and a `.release-please-manifest.json`. The action creates annotated tags by default; set `"annotated-tag": false` in the config to opt out and get the lightweight tag the GitHub Releases API creates instead. The reusable workflow does not tag or release anything itself; it only invokes the action. Outputs include `releases_created`, `release_created`, `tag_name`, `version`, and `paths_released` so caller jobs can `needs:` the release-please job and gate on a release being created. A sixth output, `release_outputs`, carries the action's entire step-outputs object serialised as JSON, including the per-component keys named `<path>--<key>` (root-package keys are unprefixed) that the outputs above cannot express — in a multi-component manifest setup `paths_released` says *which* paths released, but only `release_outputs` says what tag or version each one got. Parse it with `fromJSON` and index the key you want:
+
+```yaml
+jobs:
+  release-please:
+    uses: openCoreEMR/github-workflows-public/.github/workflows/release-please-reusable.yml@<tag>
+    permissions:
+      contents: write
+      pull-requests: write
+    secrets: inherit
+
+  deploy-web:
+    needs: release-please
+    if: ${{ fromJSON(needs.release-please.outputs.release_outputs)['apps/web--release_created'] == 'true' }}
+    uses: ./.github/workflows/deploy.yml
+    with:
+      release_tag: ${{ fromJSON(needs.release-please.outputs.release_outputs)['apps/web--tag_name'] }}
+```
+
+`release_outputs` is always a parseable JSON object, even on a push that released nothing. Beyond the named outputs above it carries, for example, `prs_created`, `pr` and `prs`, and per released path `sha`, `html_url`, `upload_url`, `major`/`minor`/`patch` and `body` (the full release notes text). That list is illustrative, not exhaustive — the full key set is whatever the pinned action's `outputReleases()` and `outputPRs()` emit, so it can change when the action ref is bumped. `body` makes the blob large, and all of a job's outputs together must fit GitHub's 1 MB per-job output limit (50 MB across a whole workflow run), so prefer the named outputs above when they already answer the question.
+
+Treat `body`, `pr`, `prs` and `name` as untrusted text: they come from commit messages and PR titles. Pass them to a script through `env:` — never interpolate them directly into a `run:` block.
 
 Inputs:
 
