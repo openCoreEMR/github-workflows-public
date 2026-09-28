@@ -4,6 +4,11 @@ updates:
     directory: /
     schedule:
       interval: daily
+    ignore:
+      # Bump the fork by hand. Its plain vX.Y.Z tags mirror upstream, which
+      # semver ranks above vX.Y.Z-oce.N, so Dependabot proposes dropping our patches.
+      # Drop this when rhysd/actionlint#668 lands and we return to upstream.
+      - dependency-name: openCoreEMR/actionlint
     labels:
       - dependencies
       - github-actions
