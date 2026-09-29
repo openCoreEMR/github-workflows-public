@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.0...1.1.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* **release-please:** bump action to v5.0.0-oce.4 ([04d2a7d](https://github.com/openCoreEMR/github-workflows-public/commit/04d2a7dd3709fe122dbd93c077e5cfd8a098a63e))
+
 ## [1.1.0](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.2...1.1.0) (2026-09-25)
 
 
