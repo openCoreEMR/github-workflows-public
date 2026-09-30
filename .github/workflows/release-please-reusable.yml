@@ -116,6 +116,17 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    # Serialize runs within the caller's repo. GitHub occasionally delivers
+    # one push as two workflow runs; unserialized, both build the same release
+    # commit and the slower one fails updating the release branch ref. The
+    # group is repo-wide, not per-ref, because release-please always targets
+    # the default branch. Queued runs wait rather than cancel the running one;
+    # a newer queued run supersedes an older one, which is safe because it
+    # sees a later HEAD. The name is distinct from any group a caller might
+    # declare, since a shared name would deadlock caller and callee.
+    concurrency:
+      group: release-please-reusable
+      cancel-in-progress: false
     # Hoist credentials to job env so step-level `if:` can read them — GitHub
     # allows the `env` context in step `if:` only when env is defined at the
     # workflow or job level, and the `secrets` context isn't allowed in `if:`

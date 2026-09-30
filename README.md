@@ -80,6 +80,8 @@ jobs:
 
 Treat `body`, `pr`, `prs` and `name` as untrusted text: they come from commit messages and PR titles. Pass them to a script through `env:` — never interpolate them directly into a `run:` block.
 
+The job runs in a repo-wide `release-please-reusable` concurrency group without `cancel-in-progress`, so overlapping pushes (or a single push GitHub delivers twice) queue instead of racing to update the release PR branch. Don't declare a concurrency group of the same name in the caller; caller and callee would deadlock on it.
+
 Inputs:
 
 | Name                   | Type   | Default                          | Description                              |
