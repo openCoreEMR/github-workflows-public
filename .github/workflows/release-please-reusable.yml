@@ -120,10 +120,11 @@ jobs:
     # one push as two workflow runs; unserialized, both build the same release
     # commit and the slower one fails updating the release branch ref. The
     # group is repo-wide, not per-ref, because release-please always targets
-    # the default branch. Queued runs wait rather than cancel the running one;
-    # a newer queued run supersedes an older one, which is safe because it
-    # sees a later HEAD. The name is distinct from any group a caller might
-    # declare, since a shared name would deadlock caller and callee.
+    # the default branch. GitHub keeps one pending run per group and cancels
+    # it when a newer run queues. That loses no release work, because
+    # release-please reads the branch's current HEAD; `queue: max` would avoid
+    # the canceled run once actionlint accepts the key (#40). A caller that
+    # declares a group of this name deadlocks with this job.
     concurrency:
       group: release-please-reusable
       cancel-in-progress: false
