@@ -128,6 +128,10 @@ jobs:
     concurrency:
       group: release-please-reusable
       cancel-in-progress: false
+    # Bound a hung run: it holds the concurrency group, so no later run in
+    # the repo can start until it ends. The slowest caller's job takes just
+    # under five minutes.
+    timeout-minutes: 30
     # Hoist credentials to job env so step-level `if:` can read them — GitHub
     # allows the `env` context in step `if:` only when env is defined at the
     # workflow or job level, and the `secrets` context isn't allowed in `if:`

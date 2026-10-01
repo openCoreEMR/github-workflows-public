@@ -80,7 +80,7 @@ jobs:
 
 Treat `body`, `pr`, `prs` and `name` as untrusted text: they come from commit messages and PR titles. Pass them to a script through `env:` — never interpolate them directly into a `run:` block.
 
-The job runs in a repo-wide `release-please-reusable` concurrency group without `cancel-in-progress`, so overlapping pushes (or a single push GitHub delivers twice) wait instead of racing to update the release PR branch. GitHub keeps one pending run per group, so a third overlapping run cancels the one already waiting. The canceled run shows as a failed check on its commit, but no release work is lost: the replacement reads the branch's current HEAD, not the commit that triggered it. [#40](https://github.com/openCoreEMR/github-workflows-public/issues/40) tracks removing that case with `queue: max`. Don't declare a concurrency group of the same name in the caller; caller and callee would deadlock on it.
+The job runs in a repo-wide `release-please-reusable` concurrency group without `cancel-in-progress`, so overlapping pushes (or a single push GitHub delivers twice) wait instead of racing to update the release PR branch. GitHub keeps one pending run per group, so a third overlapping run cancels the one already waiting. The canceled run shows as a failed check on its commit, but no release work is lost: the replacement reads the branch's current HEAD, not the commit that triggered it. [#40](https://github.com/openCoreEMR/github-workflows-public/issues/40) tracks removing that case with `queue: max`. The job times out after 30 minutes so a hung run cannot hold the group indefinitely. Don't declare a concurrency group of the same name in the caller; caller and callee would deadlock on it.
 
 Inputs:
 
