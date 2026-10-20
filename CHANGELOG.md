@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.0...1.1.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* accept the concurrency queue key in the shared actionlint check ([3036a0f](https://github.com/openCoreEMR/github-workflows-public/commit/3036a0f282fb7425f2eaac671f7d0ecc65e94a2a))
+* accept the concurrency queue key in the shared actionlint check ([bf7b976](https://github.com/openCoreEMR/github-workflows-public/commit/bf7b976e3857305db34a6422e8ee8c9a0a3296ce))
+* **release-please:** bump action to v5.0.0-oce.4 ([04d2a7d](https://github.com/openCoreEMR/github-workflows-public/commit/04d2a7dd3709fe122dbd93c077e5cfd8a098a63e))
+
 ## [1.1.0](https://github.com/openCoreEMR/github-workflows-public/compare/1.0.2...1.1.0) (2026-09-25)
 
 
