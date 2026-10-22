@@ -44,10 +44,60 @@ jobs:
   actionlint:
     name: Lint GitHub Actions workflows
     runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    # Install the linters from GitHub releases, PyPI and a source build rather
+    # than running the fork as a Docker action. The fork has no action.yml, so
+    # `uses:` builds its Dockerfile from Docker Hub images during job setup,
+    # before any step can sign in, and shared runners get 429s from Docker Hub.
+    # The fork publishes no binaries, so the job builds it. Dependabot does not
+    # see these pins; bump them by hand. When upstream releases the fork's
+    # patches (rhysd/actionlint#654 and #668), use upstream's release binary.
+    env:
+      ACTIONLINT_VERSION: v1.7.12-oce.3
+      PYFLAKES_VERSION: 3.4.0
+      SHELLCHECK_VERSION: v0.11.0
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check out actionlint
+        uses: actions/checkout@v7
+        with:
+          repository: openCoreEMR/actionlint
+          ref: ${{ env.ACTIONLINT_VERSION }}
+          path: .actionlint
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: .actionlint/go.mod
+          cache-dependency-path: .actionlint/go.sum
+
+      - name: Install shellcheck
+        run: |
+          case "$(uname -m)" in
+            x86_64) arch=x86_64 sha=8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198 ;;
+            aarch64) arch=aarch64 sha=12b331c1d2db6b9eb13cfca64306b1b157a86eb69db83023e261eaa7e7c14588 ;;
+            *) printf 'Unsupported runner architecture: %s\n' "$(uname -m)" >&2; exit 1 ;;
+          esac
+          tarball="$RUNNER_TEMP/shellcheck.tar.xz"
+          curl -fsSLo "$tarball" "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.${arch}.tar.xz"
+          printf '%s  %s\n' "$sha" "$tarball" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xJf "$tarball" -C "$RUNNER_TEMP/bin" --strip-components=1 "shellcheck-${SHELLCHECK_VERSION}/shellcheck"
+          printf '%s\n' "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Install pyflakes
+        run: pipx install "pyflakes==${PYFLAKES_VERSION}"
+
+      - name: Build actionlint
+        working-directory: .actionlint
+        run: go build -ldflags "-s -w -X github.com/rhysd/actionlint.version=${ACTIONLINT_VERSION}" -o "$RUNNER_TEMP/bin/actionlint" ./cmd/actionlint
 
       - name: Run actionlint
-        uses: openCoreEMR/actionlint@v1.7.12-oce.3
+        run: |
+          actionlint -version
+          actionlint
