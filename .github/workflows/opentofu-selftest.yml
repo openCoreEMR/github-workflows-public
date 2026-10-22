@@ -96,6 +96,18 @@ jobs:
           grep -q '^|||||||' "$scratch/diff3/conflicted.txt"
           expect 1 "$scratch/diff3" 'diff3-style markers fail'
 
+          # Each marker kind alone in its own repo, so removing any single
+          # alternative from the pattern fails the job (the fixtures above
+          # each contain several kinds, so one surviving kind would mask it).
+          n=0
+          for marker in '<<<<<<< x' '=======' '>>>>>>> x' '||||||| x'; do
+            n=$((n + 1))
+            git init -q "$scratch/single$n"
+            printf '%s\n' "$marker" > "$scratch/single$n/marker.txt"
+            git -C "$scratch/single$n" add marker.txt
+            expect 1 "$scratch/single$n" "lone '$marker' marker fails"
+          done
+
       - name: OpenTofu-files guard catches an empty directory
         run: |
           set -euo pipefail
