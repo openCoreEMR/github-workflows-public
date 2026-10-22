@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.2](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.1...1.1.2) (2026-10-22)
+
+
+### Bug Fixes
+
+* do not leave checkout token in actionlint and hadolint ([ce00a3b](https://github.com/openCoreEMR/github-workflows-public/commit/ce00a3ba4185fc07d11609e5b5705f8d5fcb2662))
+* install pinned linter binaries to avoid Docker Hub 429s ([d933c9b](https://github.com/openCoreEMR/github-workflows-public/commit/d933c9b331d0c8d45793bc0dcd9939e43abe540c))
+* stop shared workflows from pulling Docker Hub images anonymously ([fb5b2d9](https://github.com/openCoreEMR/github-workflows-public/commit/fb5b2d974725f36cfd87a6f93dc57aa2084c3669))
+
 ## [1.1.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.0...1.1.1) (2026-10-20)
 
 
