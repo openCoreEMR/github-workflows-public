@@ -18,6 +18,7 @@ When invoking these reusable workflows, the **caller** must declare the permissi
 | `conventional-pr-title.yml` | `pull-requests: read` |
 | `dclint.yml` | `contents: read` |
 | `hadolint.yml` | `contents: read` |
+| `opentofu.yml` | `contents: read` |
 | `php-composer-script.yml` | `contents: read` |
 | `php-tests.yml` | `contents: read` |
 | `release-please-reusable.yml` | `contents: write`, `pull-requests: write` |
@@ -100,3 +101,25 @@ Secrets:
 Callers in the `openCoreEMR` org should use `secrets: inherit`. The reusable workflow reads the org variable `RELEASE_PLEASE_CLIENT_ID` (auto-inherited) and the org secret `RELEASE_PLEASE_PRIVATE_KEY` (forwarded by `inherit`), mints a short-lived App installation token, and uses it for checkout and release-please. PRs opened by the App identity trigger downstream `pull_request` workflows; PRs opened by the default `GITHUB_TOKEN` do not (GitHub anti-recursion).
 
 The pinned action ref (`openCoreEMR/release-please-action@v5.0.0-oce.4`) is hardcoded — GitHub Actions does not allow expressions in `uses:` references, so it can't be a workflow input.
+
+### `opentofu.yml`
+
+Checks an OpenTofu module: a merge-conflict-marker scan, then `tofu fmt -check -recursive`, `tofu init -backend=false`, `tofu validate` and `tofu test`, the last four run in `working-directory`. The conflict-marker step runs `git grep` over every tracked file in the repo, not just `working-directory`, because `tofu fmt` only notices markers in OpenTofu files and a conflicted `.gitignore` or workflow would otherwise pass. It matches only the exact 7-character markers at the start of a line (`<<<<<<<` and `>>>>>>>` followed by a space or end of line, `=======` alone on its line, and the diff3 `|||||||`). Install uses `opentofu/setup-opentofu` with its output wrapper disabled, so `tofu` behaves as the plain binary.
+
+Known limits:
+
+- A line of exactly `=======` (for example a setext Markdown heading underline below a 7-character title) fails the conflict-marker check.
+- A guard step fails the run when `working-directory` contains no `.tf`, `.tofu`, `.tf.json` or `.tofu.json` file, because `tofu init`, `validate` and `test` all exit 0 on an empty directory.
+- `tofu init` downloads modules even with `-backend=false`, and the workflow has no SSH key or token input, so for now module sources must be fetchable without credentials (public registry or `https://` sources, not private `git@github.com:` ones).
+
+Path filters belong in the caller (see above); the header comment of the workflow has the recommended stanza. Do not put `paths:` on the caller's `pull_request`, or a skipped run leaves a required check missing.
+
+Inputs:
+
+| Name                | Type   | Default         | Description                                                                                                  |
+|---------------------|--------|-----------------|--------------------------------------------------------------------------------------------------------------|
+| `tofu-version`      | string | `~1.10.0`       | OpenTofu version or semver range, as accepted by setup-opentofu. The default matches `required_version = "~> 1.10.0"`. |
+| `working-directory` | string | `.`             | Directory containing the module, relative to the repo root                                                   |
+| `runs-on`           | string | `ubuntu-latest` | Runner label                                                                                                 |
+
+This repo tests the workflow with `opentofu-selftest.yml`, which calls it against the mocked fixture module in `tests/opentofu/` (a `mock_provider` test, so no credentials and no real resources) on every PR to `main`. Its `scripts` job also extracts the conflict-marker and OpenTofu-files steps' `run:` blocks from `opentofu.yml` with `yq` and runs them against scratch repos, so a regression in either script fails the PR.

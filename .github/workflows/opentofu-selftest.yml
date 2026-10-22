@@ -1,0 +1,124 @@
+# Self-test for the reusable OpenTofu workflow: calls it against the mocked
+# fixture module in tests/opentofu so changes to opentofu.yml are exercised on
+# their own PR before release. `pull_request` has no `paths:` so the check can
+# be required (see the stanza in opentofu.yml).
+#
+# The `scripts` job pulls the `run:` blocks of two steps out of opentofu.yml by
+# step name (so it tests the real text, not a copy) and runs them against
+# scratch inputs: the conflict-marker step must fail on real markers and pass
+# on clean files, and the OpenTofu-files guard must fail on an empty directory.
+name: opentofu-selftest
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/opentofu.yml
+      - .github/workflows/opentofu-selftest.yml
+      - tests/opentofu/**
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  opentofu:
+    uses: ./.github/workflows/opentofu.yml
+    permissions:
+      contents: read
+    with:
+      working-directory: tests/opentofu
+
+  scripts:
+    name: Test workflow step scripts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Conflict-marker step catches real markers
+        run: |
+          set -euo pipefail
+          scratch=$(mktemp -d "$RUNNER_TEMP/markers.XXXXXX")
+          script="$scratch/step.sh"
+          yq '.jobs.opentofu.steps[] | select(.name == "Check for merge conflict markers") | .run' \
+            .github/workflows/opentofu.yml > "$script"
+          [ -s "$script" ] || { echo 'could not extract the conflict-marker step'; exit 1; }
+
+          # Run the step as Actions does (`bash -e`) inside a scratch repo.
+          # Usage: expect <want-exit-code> <repo-dir> <description>
+          expect() {
+            local rc=0
+            out=$(cd "$2" && bash -e "$script" 2>&1) || rc=$?
+            printf '%s\n' "$out"
+            if [ "$rc" -ne "$1" ]; then
+              echo "FAIL: $3 (exit $rc, wanted $1)"
+              exit 1
+            fi
+            echo "ok: $3 (exit $rc)"
+          }
+
+          # Seed a conflicted file with git's own marker writer, with the
+          # conflict style pinned so local git config cannot change it.
+          # Usage: seed <repo-dir> <merge|diff3>
+          seed() {
+            mkdir -p "$1" "$scratch/seed"
+            git init -q "$1"
+            printf 'a\nbase\nc\n' > "$scratch/seed/base"
+            printf 'a\nbefore\nc\n' > "$scratch/seed/ours"
+            printf 'a\nafter\nc\n' > "$scratch/seed/theirs"
+            local rc=0
+            git -c merge.conflictStyle="$2" merge-file -L 'before updating' -L 'last update' -L 'after updating' \
+              "$scratch/seed/ours" "$scratch/seed/base" "$scratch/seed/theirs" || rc=$?
+            [ "$rc" -eq 1 ] || { echo "git merge-file made $rc conflicts, wanted 1"; exit 1; }
+            mv "$scratch/seed/ours" "$1/conflicted.txt"
+            git -C "$1" add conflicted.txt
+          }
+
+          # Clean repo, including look-alikes that must not match.
+          git init -q "$scratch/clean"
+          printf '=====\n<<<<<<<< eight\n=======x\ninline <<<<<<< text\n' > "$scratch/clean/ok.txt"
+          git -C "$scratch/clean" add ok.txt
+          expect 0 "$scratch/clean" 'clean repo passes'
+
+          seed "$scratch/merge" merge
+          grep -q '^=======$' "$scratch/merge/conflicted.txt"
+          if grep -q '^|||||||' "$scratch/merge/conflicted.txt"; then
+            echo 'merge-style seed unexpectedly has a diff3 base marker'
+            exit 1
+          fi
+          expect 1 "$scratch/merge" 'merge-style markers fail'
+
+          rm -rf "$scratch/seed"
+          seed "$scratch/diff3" diff3
+          grep -q '^|||||||' "$scratch/diff3/conflicted.txt"
+          expect 1 "$scratch/diff3" 'diff3-style markers fail'
+
+      - name: OpenTofu-files guard catches an empty directory
+        run: |
+          set -euo pipefail
+          scratch=$(mktemp -d "$RUNNER_TEMP/guard.XXXXXX")
+          script="$scratch/step.sh"
+          yq '.jobs.opentofu.steps[] | select(.name == "Check for OpenTofu files") | .run' \
+            .github/workflows/opentofu.yml > "$script"
+          [ -s "$script" ] || { echo 'could not extract the OpenTofu-files guard'; exit 1; }
+
+          # Usage: expect <want-exit-code> <dir> <description>
+          expect() {
+            local rc=0
+            out=$(cd "$2" && bash -e "$script" 2>&1) || rc=$?
+            printf '%s\n' "$out"
+            if [ "$rc" -ne "$1" ]; then
+              echo "FAIL: $3 (exit $rc, wanted $1)"
+              exit 1
+            fi
+            echo "ok: $3 (exit $rc)"
+          }
+
+          mkdir "$scratch/empty" "$scratch/other"
+          echo text > "$scratch/other/README.md"
+          expect 1 "$scratch/empty" 'empty directory fails'
+          expect 1 "$scratch/other" 'directory without OpenTofu files fails'
+          expect 0 tests/opentofu 'fixture module passes'
