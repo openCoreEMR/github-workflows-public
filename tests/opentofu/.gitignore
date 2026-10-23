@@ -1,0 +1,5 @@
+# Local `tofu init` output. The lock file is deliberately not committed: the
+# provider is bounded by `~> 3.7` in main.tf, and nothing in this repo would
+# keep a committed lock fresh.
+.terraform/
+.terraform.lock.hcl
