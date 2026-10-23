@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.2...1.2.0) (2026-10-23)
+
+
+### Features
+
+* add a reusable OpenTofu checks workflow ([4d2f1e0](https://github.com/openCoreEMR/github-workflows-public/commit/4d2f1e0675a3d0a536e523f624b0a7df0a0b3e4d))
+
 ## [1.1.2](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.1...1.1.2) (2026-10-22)
 
 
