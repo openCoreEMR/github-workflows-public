@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.0...1.2.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* **release-please:** queue overlapping runs to prevent branch races ([46e2e1e](https://github.com/openCoreEMR/github-workflows-public/commit/46e2e1e5f1952e6b7c35b94e3cf7aef862d82171))
+
 ## [1.2.0](https://github.com/openCoreEMR/github-workflows-public/compare/1.1.2...1.2.0) (2026-10-23)
 
 
