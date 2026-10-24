@@ -81,6 +81,8 @@ jobs:
 
 Treat `body`, `pr`, `prs` and `name` as untrusted text: they come from commit messages and PR titles. Pass them to a script through `env:` — never interpolate them directly into a `run:` block.
 
+The job runs in a repo-wide `release-please-reusable` concurrency group with `queue: max` and without `cancel-in-progress`, so overlapping pushes (a burst of merges, or a single push GitHub delivers twice) wait their turn instead of racing to update the release PR branch. Each queued run reads the branch's current HEAD, so a run that starts after its commit has been overtaken finds nothing left to do. The job times out after 30 minutes so a hung run cannot hold the group indefinitely. Don't declare a concurrency group of the same name in the caller; caller and callee would deadlock on it.
+
 Inputs:
 
 | Name                   | Type   | Default                          | Description                              |

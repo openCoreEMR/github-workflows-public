@@ -116,6 +116,22 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    # Serialize runs within the caller's repo. Unserialized, overlapping runs
+    # (a burst of merges, or one push GitHub delivers twice) each build a
+    # release commit, and the slower one fails updating the release branch
+    # ref. The group is repo-wide, not per-ref, because release-please always
+    # targets the default branch. `queue: max` keeps every run waiting its
+    # turn; without it GitHub keeps one pending run and cancels it when a
+    # newer one queues, which shows as a failed check on that commit. A
+    # caller that declares a group of this name deadlocks with this job.
+    concurrency:
+      group: release-please-reusable
+      queue: max
+      cancel-in-progress: false
+    # Bound a hung run: it holds the concurrency group, so no later run in
+    # the repo can start until it ends. The slowest caller's job takes just
+    # under five minutes.
+    timeout-minutes: 30
     # Hoist credentials to job env so step-level `if:` can read them — GitHub
     # allows the `env` context in step `if:` only when env is defined at the
     # workflow or job level, and the `secrets` context isn't allowed in `if:`
