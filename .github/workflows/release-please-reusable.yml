@@ -190,7 +190,7 @@ jobs:
 
       - name: Run Release Please
         id: release
-        uses: openCoreEMR/release-please-action@v5.0.0-oce.4
+        uses: openCoreEMR/release-please-action@v5.0.0-oce.5
         with:
           config-file: ${{ inputs.config-file }}
           manifest-file: ${{ inputs.manifest-file }}
