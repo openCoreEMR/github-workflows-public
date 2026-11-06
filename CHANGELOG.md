@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.1...1.2.2) (2026-11-06)
+
+
+### Bug Fixes
+
+* **deps:** change Dependabot commit prefix from chore(ci) to fix(deps) ([dcd0af3](https://github.com/openCoreEMR/github-workflows-public/commit/dcd0af3b8e3168093ed97184018ae696bdcc285c))
+
 ## [1.2.1](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.0...1.2.1) (2026-10-24)
 
 
