@@ -11,5 +11,8 @@ updates:
     labels:
       - dependencies
       - github-actions
+    # Consumers run these workflows, so a new action version is a change they
+    # see. fix(deps) makes release-please cut a release for it; chore(ci) is
+    # hidden and never released.
     commit-message:
-      prefix: chore(ci)
+      prefix: fix(deps)
