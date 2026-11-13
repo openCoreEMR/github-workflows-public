@@ -70,10 +70,13 @@ jobs:
           path: .actionlint
           persist-credentials: false
 
+      # Build with the latest stable Go, not the fork's `go` directive, which
+      # pins an exact release (1.25.0) that is past end of support and has
+      # standard-library vulnerabilities actionlint's code reaches.
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
-          go-version-file: .actionlint/go.mod
+          go-version: stable
           cache-dependency-path: .actionlint/go.sum
 
       - name: Install shellcheck
