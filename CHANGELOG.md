@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.3...1.2.4) (2026-11-17)
+
+
+### Bug Fixes
+
+* **deps:** bump openCoreEMR/release-please-action ([ed46773](https://github.com/openCoreEMR/github-workflows-public/commit/ed46773a3e122bf0f926a4b79d35b7a83e909d82))
+
 ## [1.2.3](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.2...1.2.3) (2026-11-12)
 
 
