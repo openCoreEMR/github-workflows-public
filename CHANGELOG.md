@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.5](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.4...1.2.5) (2026-11-18)
+
+
+### Bug Fixes
+
+* **actionlint:** build with the latest stable Go instead of go.mod ([48d8144](https://github.com/openCoreEMR/github-workflows-public/commit/48d8144dfb59db849a5d259ae56dcc1a01b0d1c4))
+
 ## [1.2.4](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.3...1.2.4) (2026-11-17)
 
 
