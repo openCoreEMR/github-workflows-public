@@ -33,6 +33,7 @@ on:
           chore
           revert
           deps
+          deploy
       require-scope:
         description: Whether to require a scope in the PR title
         type: boolean
