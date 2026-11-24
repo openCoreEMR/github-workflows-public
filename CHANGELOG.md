@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.5...1.3.0) (2026-11-24)
+
+
+### Features
+
+* **conventional-pr-title:** allow the deploy type by default ([7bee8b7](https://github.com/openCoreEMR/github-workflows-public/commit/7bee8b7b37ae4a7eb96afe0b3573809ff03930fd))
+
+
+### Bug Fixes
+
+* **deps:** bump openCoreEMR/release-please-action ([776008c](https://github.com/openCoreEMR/github-workflows-public/commit/776008c2f09309375d22ad871ca4c37a6e5e7497))
+
 ## [1.2.5](https://github.com/openCoreEMR/github-workflows-public/compare/1.2.4...1.2.5) (2026-11-18)
 
 
